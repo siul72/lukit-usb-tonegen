@@ -1,6 +1,7 @@
 #include "usbd_ctlreq.h"
 #include "usbd_ioreq.h"
 #include "utils.h"
+#include "logging.h"
 
  
 static void USBD_GetDescriptor(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
@@ -18,10 +19,10 @@ USBD_StatusTypeDef USBD_StdDevReq(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef
   uint8_t ep_addr;
   ep_addr = LOBYTE(req->wIndex);
  
-  sprintf(Utils::UART2_TX_Buffer, ">>USBD_StdDevReq REQ_TYPE=" BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(req->bmRequest));
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
-  sprintf(Utils::UART2_TX_Buffer, " ep_addr=0x%02x bRequest=0x%02x wValue=0x%04x wIndex=0x%04x\n", ep_addr, req->bRequest, req->wValue, req->wIndex);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>USBD_StdDevReq REQ_TYPE=" BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(req->bmRequest));
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, " ep_addr=0x%02x bRequest=0x%02x wValue=0x%04x wIndex=0x%04x\n", ep_addr, req->bRequest, req->wValue, req->wIndex);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {
@@ -63,19 +64,19 @@ USBD_StatusTypeDef USBD_StdDevReq(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef
 
         default:
           USBD_CtlError(pdev, req);
-          Utils::getInstance()->console_write("USBD_CtlError(pdev, req)");
+          Logging::getInstance()->console_write("USBD_CtlError(pdev, req)");
           break;
       }
       break;
 
     default:
       USBD_CtlError(pdev, req);
-      Utils::getInstance()->console_write("USBD_CtlError(pdev, req) 2");
+      Logging::getInstance()->console_write("USBD_CtlError(pdev, req) 2");
       break;
   }
 
-  sprintf(Utils::UART2_TX_Buffer, "<<USBD_StdDevReq Return=0x%02x\n", ret );
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, "<<USBD_StdDevReq Return=0x%02x\n", ret );
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   return ret;
 }
@@ -87,10 +88,10 @@ USBD_StatusTypeDef USBD_StdItfReq(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef
   uint8_t ep_addr;
   ep_addr = LOBYTE(req->wIndex);
 
-  sprintf(Utils::UART2_TX_Buffer, ">>USBD_StdItfReq REQ_TYPE=" BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(req->bmRequest));
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
-  sprintf(Utils::UART2_TX_Buffer, " ep_addr=0x%02x bRequest=0x%02x wValue=0x%04x wIndex=0x%04x\n", ep_addr, req->bRequest, req->wValue, req->wIndex);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>USBD_StdItfReq REQ_TYPE=" BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(req->bmRequest));
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, " ep_addr=0x%02x bRequest=0x%02x wValue=0x%04x wIndex=0x%04x\n", ep_addr, req->bRequest, req->wValue, req->wIndex);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {
@@ -129,8 +130,8 @@ USBD_StatusTypeDef USBD_StdItfReq(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef
       break;
   }
 
-  sprintf(Utils::UART2_TX_Buffer, "<<USBD_StdItfReq Return=0x%02x\n", ret );
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, "<<USBD_StdItfReq Return=0x%02x\n", ret );
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   return ret;
 }
@@ -144,8 +145,8 @@ USBD_StatusTypeDef USBD_StdEPReq(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
 
   uint8_t bmRequest = req->bmRequest & USB_REQ_TYPE_MASK;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>USBD_StdEPReq ep_addr=0x%02x bmRequest=0x%02x bRequest=0x%02x\n", ep_addr, bmRequest, req->bRequest);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>USBD_StdEPReq ep_addr=0x%02x bmRequest=0x%02x bRequest=0x%02x\n", ep_addr, bmRequest, req->bRequest);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   switch (bmRequest)
   {
@@ -296,8 +297,8 @@ USBD_StatusTypeDef USBD_StdEPReq(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
     break;
   }
 
-  sprintf(Utils::UART2_TX_Buffer, "<<USBD_StdEPReq\n");
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, "<<USBD_StdEPReq\n");
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   return ret;
 }

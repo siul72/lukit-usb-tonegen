@@ -226,7 +226,7 @@ void Sampler::sample(ToneGenerator* generator, int toneFrequencyHz, double durat
     const double sampleValueRange = pow(2, this->bitsPerSample);
     const int sample_buffer_size = this->sampleRateHz * durationSeconds;
     //sprintf(Utils::getInstance()->UART2_TX_Buffer, "Generate tone number of samples = %d\n", (int)sample_buffer_size);
-    //Utils::getInstance()->console_write(Utils::getInstance()->UART2_TX_Buffer);
+    //Logging::getInstance()->console_write(Utils::getInstance()->UART2_TX_Buffer);
     for(int i=0; i < sample_buffer_size; i++) {
         double timeIndexSeconds = (double)i / this->sampleRateHz;
         double sample = generator->generate(toneFrequencyHz, timeIndexSeconds, durationSeconds);
@@ -236,6 +236,10 @@ void Sampler::sample(ToneGenerator* generator, int toneFrequencyHz, double durat
         sample = sample * volume;
         // map continous result from tone generator [-1.0, 1.0] to discrete sample value range [0 .. 255]
         char sampleValue = sampleValueRange * (sample + 1.0) / 2.0;
+        sampleValue = sampleValue + 127;
+        this->sampleData.push_back(0);
+        this->sampleData.push_back(sampleValue);
+        this->sampleData.push_back(0);
         this->sampleData.push_back(sampleValue);
     }
 }

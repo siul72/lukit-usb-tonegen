@@ -1,6 +1,6 @@
  
 #include "usbd_audio_if.h"
-#include "utils.h"
+#include "logging.h"
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
  
@@ -131,7 +131,7 @@ static int8_t AUDIO_PeriodicTC(uint8_t *pbuf, uint32_t size, uint8_t cmd)
   UNUSED(size);
   UNUSED(cmd);
 
-  Utils::getInstance()->console_write("AUDIO_PeriodicTC_FS");
+  Logging::getInstance()->console_write("AUDIO_PeriodicTC_FS");
   
   return (USBD_OK);
  
@@ -176,7 +176,7 @@ int8_t AUDIO_CommandMgr(uint8_t cmd)
 
 void TransferComplete_CallBack_FS(void)
 {
-  Utils::getInstance()->console_write("TransferComplete_CallBack_FS");
+  Logging::getInstance()->console_write("TransferComplete_CallBack_FS");
   USBD_AUDIO_Sync(&hUsbDeviceFS, AUDIO_OFFSET_FULL);
   /* USER CODE END 7 */
 }
@@ -184,7 +184,7 @@ void TransferComplete_CallBack_FS(void)
 void HalfTransfer_CallBack_FS(void)
 {
   
-  Utils::getInstance()->console_write("HalfTransfer_CallBack_FS");
+  Logging::getInstance()->console_write("HalfTransfer_CallBack_FS");
   USBD_AUDIO_Sync(&hUsbDeviceFS, AUDIO_OFFSET_HALF);
   /* USER CODE END 8 */
 }

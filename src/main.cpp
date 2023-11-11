@@ -27,6 +27,7 @@
 #include "main.h"
 #include "usb_device.h"
 #include "utils.h"
+#include "logging.h"
  
 void SystemClock_Config(void);
 static void MX_DMA_Init(void);
@@ -38,6 +39,7 @@ DMA_HandleTypeDef hdma_adc1;
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_rx;
 Utils* Utils::instancePtr = NULL;
+Logging* Logging::instancePtr = NULL;
  
 void _write(int file, const char *data, const uint32_t size){
     uint32_t i;
@@ -55,7 +57,7 @@ int main(void){
   MX_USB_DEVICE_Init();
 
   Utils *myUtils = Utils::getInstance();
-  myUtils->console_write("System start...\n"); 
+  Logging::getInstance()->console_write("System start...\n"); 
   
   uint32_t elapsed_time, current_time = 0;
   uint32_t delta_time = 100;

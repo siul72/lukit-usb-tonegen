@@ -25,9 +25,9 @@ public:
     Utils();
     Utils(const Utils& obj) = delete;
     void init();
-    void init_uart();
+  
     static void error_handler(void);
-    void console_write(const char* msg);
+  
     double get_increment_from_hz(int hz);
     void get_sine_sample();
     uint32_t usb_audio_write_tx_data(char *buf, uint32_t len);
@@ -40,6 +40,7 @@ public:
     uint8_t audioBufferTx[1024];
 
 private:
+    
     static Utils* instancePtr; 
     int32_t sample_period;
     double theta;
@@ -56,6 +57,9 @@ private:
     NoEnvelope *noEnvelope;
     const double volume       = 0.75;     // 0.0 .. 1.0
     double noteDuration;     // seconds
+    uint32_t rd_ptr;
+    uint32_t usb_in_len;
+    uint32_t tone_buffer_len;
 
 
 };

@@ -1,6 +1,7 @@
 #include "usbd_audio.h"
 #include "usbd_ctlreq.h"
 #include "utils.h"
+#include "logging.h"
  
 extern unsigned char *USBDevice;
 extern size_t USBDeviceSize;
@@ -161,8 +162,8 @@ static uint8_t USBD_AUDIO_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   USBD_AUDIO_HandleTypeDef *haudio;
   USBD_StatusTypeDef ret_status = USBD_OK;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_Init\n");
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_Init\n");
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   /* Allocate Audio structure */
   haudio = (USBD_AUDIO_HandleTypeDef *)USBD_malloc(sizeof(USBD_AUDIO_HandleTypeDef));
@@ -197,8 +198,8 @@ static uint8_t USBD_AUDIO_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     return ret_status;
   }
 
-  sprintf(Utils::UART2_TX_Buffer, "<<USBD_AUDIO_Init OK\n");
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, "<<USBD_AUDIO_Init OK\n");
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
     
   return USBD_OK;
 }
@@ -252,8 +253,8 @@ static uint8_t USBD_AUDIO_Setup(USBD_HandleTypeDef *pdev,
   uint8_t ret = USBD_OK;
   haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_Setup bmRequest=0x%02x bRequest=0x%02x\n", (u_int8_t)(req->bmRequest & USB_REQ_TYPE_MASK), req->bRequest);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_Setup bmRequest=0x%02x bRequest=0x%02x\n", (u_int8_t)(req->bmRequest & USB_REQ_TYPE_MASK), req->bRequest);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   switch (req->bmRequest & USB_REQ_TYPE_MASK) {
   /* AUDIO Class Requests -------------------------------*/
@@ -300,8 +301,8 @@ static uint8_t USBD_AUDIO_Setup(USBD_HandleTypeDef *pdev,
       break;
 
       case USB_REQ_GET_INTERFACE:
-        sprintf(Utils::UART2_TX_Buffer, "USB_REQ_GET_INTERFACE setting=%d\n", (int)haudio->alt_setting);
-        Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+        sprintf(Logging::UART2_TX_Buffer, "USB_REQ_GET_INTERFACE setting=%d\n", (int)haudio->alt_setting);
+        Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
         USBD_CtlSendData(pdev, (uint8_t*) haudio->alt_setting, 1);
       break;
 
@@ -314,11 +315,11 @@ static uint8_t USBD_AUDIO_Setup(USBD_HandleTypeDef *pdev,
 
           if (haudio->alt_setting == 1){
             tx_flag = 0U;
-            sprintf(Utils::UART2_TX_Buffer, "START MIC TX\n");
-            Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+            sprintf(Logging::UART2_TX_Buffer, "START MIC TX\n");
+            Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
           } 
-          sprintf(Utils::UART2_TX_Buffer, "haudio->alt_setting=%d tx_flag=%d\n", (int)haudio->alt_setting, (int)tx_flag);
-          Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+          sprintf(Logging::UART2_TX_Buffer, "haudio->alt_setting=%d tx_flag=%d\n", (int)haudio->alt_setting, (int)tx_flag);
+          Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
         } else {
           /* Call the error management function (command will be nacked */
           USBD_CtlError(pdev, req);
@@ -327,8 +328,8 @@ static uint8_t USBD_AUDIO_Setup(USBD_HandleTypeDef *pdev,
     }
   }
 
-  sprintf(Utils::UART2_TX_Buffer, "<<USBD_AUDIO_Setup return=%d\n", ret);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, "<<USBD_AUDIO_Setup return=%d\n", ret);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
   return ret;
 }
 
@@ -357,8 +358,8 @@ static uint8_t USBD_AUDIO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   uint16_t packet_dim = haudio->paketDimension;
   //uint16_t channels = haudio->channels;
 
-  //sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_DataIn ts=%d\n", (int)HAL_GetTick());
-  //Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  //sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_DataIn ts=%d\n", (int)HAL_GetTick());
+  //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
    
   length_usb_pck = packet_dim;
   haudio->timeout = 0;
@@ -411,8 +412,8 @@ static uint8_t USBD_AUDIO_EP0_RxReady(USBD_HandleTypeDef *pdev)
   USBD_AUDIO_HandleTypeDef *haudio;
   haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_EP0_RxReady\n");
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_EP0_RxReady\n");
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   if (haudio == NULL)
   {
@@ -449,8 +450,8 @@ static uint8_t USBD_AUDIO_EP0_RxReady(USBD_HandleTypeDef *pdev)
 static uint8_t USBD_AUDIO_EP0_TxReady(USBD_HandleTypeDef *pdev)
 {
   UNUSED(pdev);
-  //sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_EP0_TxReady\n");
-  //Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  //sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_EP0_TxReady\n");
+  //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   /* Only OUT control data are processed */
   return (uint8_t)USBD_OK;
@@ -478,8 +479,8 @@ void USBD_AUDIO_Sync(USBD_HandleTypeDef *pdev, AUDIO_OffsetTypeDef offset)
   USBD_AUDIO_HandleTypeDef *haudio;
   uint32_t BufferSize = AUDIO_TOTAL_BUF_SIZE / 2U;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_Sync\n");
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_Sync\n");
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
 
   if (pdev->pClassData == NULL)
@@ -565,8 +566,8 @@ static uint8_t USBD_AUDIO_IsoOutIncomplete(USBD_HandleTypeDef *pdev, uint8_t epn
   UNUSED(pdev);
   UNUSED(epnum);
   
-  //sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_IsoOutIncomplete epnum=0x%02x\n",epnum);
-  //Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  //sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_IsoOutIncomplete epnum=0x%02x\n",epnum);
+  //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   return (uint8_t)USBD_OK;
 }
@@ -584,8 +585,8 @@ static uint8_t USBD_AUDIO_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
 
   haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_DataOut epnum=0x%02x\n",epnum);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_DataOut epnum=0x%02x\n",epnum);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   if (haudio == NULL)
   {
@@ -648,8 +649,8 @@ static void AUDIO_REQ_GetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   USBD_AUDIO_HandleTypeDef *haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
   uint8_t bControlSelector = req->wValue >> 8;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>AUDIO_REQ_GetCurrent bControlSelector=0x%02x\n", bControlSelector);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>AUDIO_REQ_GetCurrent bControlSelector=0x%02x\n", bControlSelector);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   char buffer[20];
   itoa(bControlSelector, buffer, 10);
@@ -686,8 +687,8 @@ static void AUDIO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
   uint8_t bControlSelector = req->wValue >> 8;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>AUDIO_REQ_SetCurrent bControlSelector=0x%02x\n", bControlSelector);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>AUDIO_REQ_SetCurrent bControlSelector=0x%02x\n", bControlSelector);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   if (haudio == NULL)
   {
@@ -701,8 +702,8 @@ static void AUDIO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
     haudio->control.len = req->wLength; /* Set the request data length */
     haudio->control.unit = HIBYTE(req->wIndex); /* Set the request target unit */
     USBD_CtlPrepareRx(pdev, (uint8_t*)&MUTE_CUR, req->wLength);
-    sprintf(Utils::UART2_TX_Buffer, "mute=0x%04x\n", MUTE_CUR);
-    Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+    sprintf(Logging::UART2_TX_Buffer, "mute=0x%04x\n", MUTE_CUR);
+    Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
     break;
 
   case FEATURE_VOLUME:
@@ -710,7 +711,7 @@ static void AUDIO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
     haudio->control.len = req->wLength; /* Set the request data length */
     haudio->control.unit = HIBYTE(req->wIndex); /* Set the request target unit */
     USBD_CtlPrepareRx(pdev, (uint8_t*) &VOL_CUR, req->wLength);
-    sprintf(Utils::UART2_TX_Buffer, "mute=0x%04x\n", MUTE_CUR);
+    sprintf(Logging::UART2_TX_Buffer, "mute=0x%04x\n", MUTE_CUR);
     break;
 
   case FEATURE_GRAPHIC_EQ:
@@ -734,8 +735,8 @@ static void AUDIO_REQ_GetMaximum(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   USBD_AUDIO_HandleTypeDef *haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
   uint8_t bControlSelector = req->wValue >> 8;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>AUDIO_REQ_GetMaximum bControlSelector=0x%02x\n", bControlSelector);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>AUDIO_REQ_GetMaximum bControlSelector=0x%02x\n", bControlSelector);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   switch (bControlSelector) {
 
@@ -771,8 +772,8 @@ static void AUDIO_REQ_GetMinimum(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   USBD_AUDIO_HandleTypeDef *haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
   uint8_t bControlSelector = req->wValue >> 8;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>AUDIO_REQ_GetMinimum bControlSelector=0x%02x\n", bControlSelector);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>AUDIO_REQ_GetMinimum bControlSelector=0x%02x\n", bControlSelector);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   switch (bControlSelector) {
 
@@ -809,8 +810,8 @@ static void AUDIO_REQ_GetResolution(USBD_HandleTypeDef *pdev, USBD_SetupReqTyped
   USBD_AUDIO_HandleTypeDef *haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
   uint8_t bControlSelector = req->wValue >> 8;
 
-  sprintf(Utils::UART2_TX_Buffer, ">>AUDIO_REQ_GetResolution bControlSelector=0x%02x\n", bControlSelector);
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>AUDIO_REQ_GetResolution bControlSelector=0x%02x\n", bControlSelector);
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   switch (bControlSelector) {
 
@@ -831,8 +832,8 @@ static void AUDIO_REQ_GetResolution(USBD_HandleTypeDef *pdev, USBD_SetupReqTyped
     break;
 
     default:
-      sprintf(Utils::UART2_TX_Buffer, ">>AUDIO_REQ_GetResolution unhandle selector\n");
-      Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+      sprintf(Logging::UART2_TX_Buffer, ">>AUDIO_REQ_GetResolution unhandle selector\n");
+      Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
     break;
 
   }
@@ -851,8 +852,8 @@ static void AUDIO_REQ_GetResolution(USBD_HandleTypeDef *pdev, USBD_SetupReqTyped
 static uint8_t *USBD_AUDIO_GetDeviceQualifierDesc(uint16_t *length)
 {
   *length = (uint16_t)sizeof(USBD_AUDIO_DeviceQualifierDesc);
-  //sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_GetDeviceQualifierDesc\n");
-  //Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  //sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_GetDeviceQualifierDesc\n");
+  //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
   return USBD_AUDIO_DeviceQualifierDesc;
 }
 
@@ -865,8 +866,8 @@ uint8_t USBD_AUDIO_RegisterInterface(USBD_HandleTypeDef *pdev,
                                      USBD_AUDIO_ItfTypeDef *fops)
 {
   
-  sprintf(Utils::UART2_TX_Buffer, ">>USBD_AUDIO_RegisterInterface\n");
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_RegisterInterface\n");
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
   if (fops == NULL)
   {
     return (uint8_t)USBD_FAIL;
@@ -874,8 +875,8 @@ uint8_t USBD_AUDIO_RegisterInterface(USBD_HandleTypeDef *pdev,
 
   pdev->pUserData = fops;
 
-  sprintf(Utils::UART2_TX_Buffer, "<<USBD_AUDIO_RegisterInterface\n");
-  Utils::getInstance()->console_write(Utils::UART2_TX_Buffer);
+  sprintf(Logging::UART2_TX_Buffer, "<<USBD_AUDIO_RegisterInterface\n");
+  Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
   return (uint8_t)USBD_OK;
 }
