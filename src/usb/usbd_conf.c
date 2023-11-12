@@ -23,8 +23,7 @@
 #include "stm32f4xx_hal.h"
 #include "usbd_def.h"
 #include "usbd_core.h"
-
-#include "usbd_audio.h"
+#include "usb/usbd_audio.h"
 
 /* USER CODE BEGIN Includes */
 

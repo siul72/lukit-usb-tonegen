@@ -24,9 +24,9 @@
 * OR FITNESS FOR A PARTICULAR PURPOSE. YOU ARE SOLELY RESPONSIBLE FOR DETERMINING THE APPROPRIATENESS OF
 * USING OR REDISTRIBUTING THE WORK AND ASSUME ANY RISKS ASSOCIATED WITH YOUR USE OF THIS WORK.
 ***********************************************************************************/
-#include "utils.h"
 #include <math.h>
-#include <usbd_audio.h>
+#include "utils.h"
+#include "usb/usbd_audio.h"
 #include "logging.h"
  
 extern ADC_HandleTypeDef hadc1;

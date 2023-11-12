@@ -1,7 +1,7 @@
 #include "usbd_core.h"
-#include "usbd_desc.h"
-#include "usbd_conf.h"
-#include "usbd_audio.h"
+#include "usb/usbd_desc.h"
+#include "usb/usbd_conf.h"
+#include "usb/usbd_audio.h"
  
 extern unsigned char *USBDevice;
 extern size_t USBDeviceSize;
@@ -236,11 +236,11 @@ static void Get_SerialNum(void)
 {
   uint32_t deviceserial0;
   uint32_t deviceserial1;
-  uint32_t deviceserial2;
+  //uint32_t deviceserial2;
 
   deviceserial0 = *(uint32_t *) DEVICE_ID1;
   deviceserial1 = *(uint32_t *) DEVICE_ID2;
-  deviceserial2 = *(uint32_t *) DEVICE_ID3;
+  //deviceserial2 = *(uint32_t *) DEVICE_ID3;
 
   deviceserial0 += 1;
    

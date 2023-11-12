@@ -1,4 +1,4 @@
-#include "usbd_audio.h"
+#include "usb/usbd_audio.h"
 #include "usbd_ctlreq.h"
 #include "utils.h"
 #include "logging.h"

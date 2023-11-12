@@ -1,6 +1,6 @@
 #include <usbgen_src.h>
-#include "usbd_desc.h"
-#include "usbd_audio.h"
+#include "usb/usbd_desc.h"
+#include "usb/usbd_audio.h"
 
 using namespace usb;
 using namespace usb::audio;

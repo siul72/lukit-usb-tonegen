@@ -1,6 +1,7 @@
 #ifndef TONEGEN_H
 #define TONEGEN_H
 
+#include "main.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -17,99 +18,6 @@ class ToneGenerator
     public:
         // the tone generator returns a continous result between [-1.0, 1.0]
         virtual double generate(int toneFrequencyHz, double timeIndexSeconds, double durationSeconds) = 0;
-};
-
-class PureToneGenerator: public ToneGenerator
-{
-    public:
-        double generate(int toneFrequencyHz, double timeIndexSeconds, double durationSeconds);
-};
-
-class SquareWaveGenerator: public ToneGenerator
-{
-    public:
-        double generate(int toneFrequencyHz, double timeIndexSeconds, double durationSeconds);
-};
-
-class ViolinGenerator: public ToneGenerator
-{
-    public:
-        double generate(int toneFrequencyHz, double timeIndexSeconds, double durationSeconds);
-};
-
-class ChirpGenerator: public ToneGenerator
-{
-    public:
-        double generate(int toneFrequencyHz, double timeIndexSeconds, double durationSeconds);
-};
-
-class BellGenerator: public ToneGenerator
-{
-    private:
-        int fm_Hz;
-        int I0;
-        double tau;
-        double theta_m;
-        double theta_c;
-    public:
-        BellGenerator(int fm_Hz, int I0, double tau);
-        double generate(int fc_Hz, double timeIndexSeconds, double durationSeconds);
-};
-
-class Envelope
-{
-    public:
-        virtual double getAmplitude(double timeIndexSeconds) = 0;
-};
-
-class NoEnvelope: public Envelope
-{
-    public:
-        double getAmplitude(double timeIndexSeconds);
-};
-
-// Attack, Decay, Sustain, Release (ADSR) Envelope: https://en.wikipedia.org/wiki/Envelope_(music)
-class ADSREnvelope: public Envelope
-{
-    private:
-        double attackDurationSeconds;
-        double attackAmplitude;
-        double decayDurationSeconds;
-        double sustainDurationSeconds;
-        double sustainAmplitude;
-        double releaseDurationSeconds;
-        double releaseAmplitude;
-    public:
-        ADSREnvelope(double durationSeconds);
-        double getAmplitude(double timeIndexSeconds);
-};
-
-class BellEnvelope: public Envelope
-{
-    private:
-        double tau; // duration it takes for the signal to decay to 1/e = 36.8%
-    public:
-        BellEnvelope(double tau);
-        double getAmplitude(double timeIndexSeconds);
-};
-
-#include <vector>
-
-class Sampler
-{
-    private:
-        int sampleRateHz;
-        int bitsPerSample;
-        int numChannels;
-        std::vector<char> sampleData;
-        Sampler();
-    public:
-        Sampler(int sampleRateHz, int bitsPerSample, int numChannels);
-        void sample(ToneGenerator* generator, int toneFrequencyHz, double durationSeconds, Envelope* envelope, double volume);
-        int getSampleRateHz();
-        int getBitsPerSample();
-        int getNumChannels();
-        std::vector<char>& getSampleData(); // TODO should consider returning "const" value
 };
 
 // Note names, MIDI numbers and frequencies: https://pages.mtu.edu/~suits/notefreqs.html
@@ -251,10 +159,5 @@ typedef struct // Sound data
     uint32_t Subchunk2Size;
 } DataSubChunk;
 
-class WAVWriter
-{
-    public:
-        static void writeSamplesToBinaryStream(Sampler* sampler, std::ofstream* wavStream);
-};
 
 #endif

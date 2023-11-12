@@ -1,5 +1,5 @@
  
-#include "usbd_audio_if.h"
+#include "usb/usbd_audio_if.h"
 #include "logging.h"
 
 extern USBD_HandleTypeDef hUsbDeviceFS;

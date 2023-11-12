@@ -24,8 +24,8 @@
 * OR FITNESS FOR A PARTICULAR PURPOSE. YOU ARE SOLELY RESPONSIBLE FOR DETERMINING THE APPROPRIATENESS OF
 * USING OR REDISTRIBUTING THE WORK AND ASSUME ANY RISKS ASSOCIATED WITH YOUR USE OF THIS WORK.
 ***********************************************************************************/
+#include "usb/usb_device.h"
 #include "main.h"
-#include "usb_device.h"
 #include "utils.h"
 #include "logging.h"
  
@@ -56,9 +56,8 @@ int main(void){
   MX_ADC1_Init();
   MX_USB_DEVICE_Init();
 
-  Utils *myUtils = Utils::getInstance();
   Logging::getInstance()->console_write("System start...\n"); 
-  
+   
   uint32_t elapsed_time, current_time = 0;
   uint32_t delta_time = 100;
   uint8_t state = 0;
@@ -67,10 +66,9 @@ int main(void){
      elapsed_time = HAL_GetTick();
      if (elapsed_time - current_time > delta_time) {
         delta_time = 50 + state * 3000;
-        state = 1 - state;
         current_time = elapsed_time;
         HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, (GPIO_PinState) state);
-        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        state = 1 - state;
      }
   }
 }

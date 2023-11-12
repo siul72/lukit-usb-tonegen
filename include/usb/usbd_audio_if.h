@@ -6,7 +6,7 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "usbd_audio.h"
+#include "usb/usbd_audio.h"
  
 /** AUDIO_IF Interface callback. */
 extern USBD_AUDIO_ItfTypeDef USBD_AUDIO_fops;

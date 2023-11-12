@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <usbd_def.h> 
-#include "tonegen.h"
+#include "generator/sampler.h"
+#include "generator/pure_tonegen.h"
+#include "generator/no_envelope.h"
 
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 #define BYTE_TO_BINARY(byte)  \
