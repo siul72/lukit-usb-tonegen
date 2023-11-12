@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <usbd_def.h> 
-#include "generator/sampler.h"
+#include "generator/buf_sampler.h"
 #include "generator/pure_tonegen.h"
 #include "generator/no_envelope.h"
 
@@ -54,7 +54,7 @@ private:
     u_int32_t sample_byte_len;
     unsigned long last_micros;
     double inc;
-    Sampler *sampler;
+    BufSampler *sampler;
     PureToneGenerator *pureTone;
     NoEnvelope *noEnvelope;
     const double volume       = 0.75;     // 0.0 .. 1.0

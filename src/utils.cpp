@@ -57,7 +57,7 @@ void Utils::init()
 
     noteDuration = 0.1;
     pureTone = new PureToneGenerator();
-    sampler = new Sampler(sampleRateHz, bitsPerSample, numChannels);
+    sampler = new BufSampler(sampleRateHz, bitsPerSample, numChannels);
     noEnvelope = new NoEnvelope();
 
     sampler->sample(pureTone, A4, noteDuration, noEnvelope, volume);
