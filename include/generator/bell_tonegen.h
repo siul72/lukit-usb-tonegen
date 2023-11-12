@@ -14,7 +14,8 @@ class BellGenerator: public ToneGenerator
         double theta_c;
     public:
         BellGenerator(int fm_Hz, int I0, double tau);
-        double generate(int fc_Hz, double timeIndexSeconds, double durationSeconds);
+        double generate(int fc_Hz, double timeIndexSeconds, int durationSeconds);
+        
 };
  
 #endif

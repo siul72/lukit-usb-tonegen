@@ -18,6 +18,7 @@ class ToneGenerator
     public:
         // the tone generator returns a continous result between [-1.0, 1.0]
         virtual double generate(int toneFrequencyHz, double timeIndexSeconds, double durationSeconds) = 0;
+ 
 };
 
 // Note names, MIDI numbers and frequencies: https://pages.mtu.edu/~suits/notefreqs.html

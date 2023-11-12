@@ -2,48 +2,37 @@
 #include "generator/envelope.h"
 #include "generator/tonegen.h" 
  
-BufSampler::BufSampler(int sampleRateHz, int bitsPerSample, int numChannels): Sampler(sampleRateHz, bitsPerSample, numChannels){
+ 
+BufSampler::BufSampler(int sampleRateHz, int bitsPerSample, int numChannels, double volume=0.75, int duration_milliseconds=1): 
+Sampler(sampleRateHz, bitsPerSample, numChannels, volume, duration_milliseconds){
  
 }
 
  
-void BufSampler::sample(ToneGenerator* generator, int toneFrequencyHz, double durationSeconds, Envelope* envelope, double volume)
+void BufSampler::sample(ToneGenerator* generator, int toneFrequencyHz, Envelope* envelope)
 {
-    if(volume == 11) {
-        // loudest
-        volume = 1.0;
-    } 
     
-    if(volume < 0 || volume > 1) {
-        //throw std::logic_error("Invalid volume: must be within range 0.0 .. 1.0");
-        volume = 1.0;
-        return;
-    }
-       
-
-    const double sampleValueRange = pow(2, this->bitsPerSample);
-    const int sample_buffer_size = this->sampleRateHz * durationSeconds;
     //sprintf(Utils::getInstance()->UART2_TX_Buffer, "Generate tone number of samples = %d\n", (int)sample_buffer_size);
     //Logging::getInstance()->console_write(Utils::getInstance()->UART2_TX_Buffer);
     for(int i=0; i < sample_buffer_size; i++) {
-        double timeIndexSeconds = (double)i / this->sampleRateHz;
-        double sample = generator->generate(toneFrequencyHz, timeIndexSeconds, durationSeconds);
+        double timeIndexSeconds = (double)i / this->sample_rate_hz;
+        double sample = generator->generate(toneFrequencyHz, timeIndexSeconds, sample_duration_time / 1000);
          // apply envelope
         sample = sample * envelope->getAmplitude(timeIndexSeconds);
         // apply volume
         sample = sample * volume;
         // map continous result from tone generator [-1.0, 1.0] to discrete sample value range [0 .. 255]
-        char sampleValue = sampleValueRange * (sample + 1.0) / 2.0;
+        char sampleValue = sample_value_range * (sample + 1.0) / 2.0;
         sampleValue = sampleValue + 127;
-        this->sampleData.push_back(0);
-        this->sampleData.push_back(sampleValue);
-        this->sampleData.push_back(0);
-        this->sampleData.push_back(sampleValue);
+        this->sample_data.push_back(0);
+        this->sample_data.push_back(sampleValue);
+        this->sample_data.push_back(0);
+        this->sample_data.push_back(sampleValue);
     }
 }
 
 
 std::vector<char> &BufSampler::getSampleData(){
-    return this->sampleData;
+    return this->sample_data;
 }
  

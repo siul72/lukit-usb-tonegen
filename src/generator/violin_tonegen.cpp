@@ -1,8 +1,10 @@
 #include "generator/violin_tonegen.h"
+ 
 
 // Violin sound https://meettechniek.info/additional/additive-synthesis.html
-double ViolinGenerator::generate(int fundamentalFrequencyHz, double timeIndexSeconds, double durationSeconds)
+double ViolinGenerator::generate(int fundamentalFrequencyHz, double timeIndexSeconds, int durationSeconds)
 {
+    UNUSED(durationSeconds);
     double amplitude = 0.49;
 
     double harmonic1PeriodSeconds = 1.0 / fundamentalFrequencyHz;

@@ -55,12 +55,12 @@ void Utils::init()
     const int numChannels     = 1;        // Mono
     const int bitsPerSample   = 8; // 8 bits
 
-    noteDuration = 0.1;
+    noteDuration = 100;
     pureTone = new PureToneGenerator();
-    sampler = new BufSampler(sampleRateHz, bitsPerSample, numChannels);
+    sampler = new BufSampler(sampleRateHz, bitsPerSample, numChannels, volume, noteDuration);
     noEnvelope = new NoEnvelope();
 
-    sampler->sample(pureTone, A4, noteDuration, noEnvelope, volume);
+    sampler->sample(pureTone, A4, noEnvelope);
 
     rd_ptr = 0;
     usb_in_len = sampleRateHz / 1000;

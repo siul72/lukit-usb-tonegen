@@ -1,27 +1,42 @@
 #include "generator/sampler.h"
- 
- 
-Sampler::Sampler(int sampleRateHz, int bitsPerSample, int numChannels){
-    if(numChannels != 1)
-    //throw std::logic_error("Unsupported value for numChannels: only 1 channel (mono) supported");
-    return;
 
-    if(bitsPerSample != 8)
-    //throw std::logic_error("Unsupported value for bitsPerSample: only 8 bits supported");
-    return;
+ 
+Sampler::Sampler(int sampleRateHz, int bitsPerSample, int numChannels, double in_volume, int durationMilliseconds){
+    if(numChannels != 1){
+           return;
+    }
+   
+    if(bitsPerSample != 8){
+        return;
+    }
+    
+    sample_value_range = pow(2, this->bits_per_sample);
+    sample_duration_time = durationMilliseconds;
+    sample_buffer_size = this->sample_rate_hz * durationMilliseconds;
+    volume = in_volume;
  }
 
+void Sampler::setVolume(double in_volume){
+     if(in_volume < 0 || in_volume > 1) {
+        // loudest
+       this->volume = 1.0;
+      
+    } 
+
+    this->volume = in_volume;
+    
+}
 
 int Sampler::getSampleRateHz(){
-    return this->sampleRateHz;
+    return this->sample_rate_hz;
 }
 
 int Sampler::getBitsPerSample(){
-    return this->bitsPerSample;
+    return this->bits_per_sample;
 }
 
 int Sampler::getNumChannels(){
-    return this->numChannels;
+    return this->num_channels;
 }
 
  

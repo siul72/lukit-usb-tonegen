@@ -6,15 +6,11 @@
  
 class BufSampler: public Sampler
 {
-    private:
-        
-        BufSampler();
+    
     public:
-        BufSampler(int sampleRateHz, int bitsPerSample, int numChannels);
-        void sample(ToneGenerator* generator, int toneFrequencyHz, double durationSeconds, Envelope* envelope, double volume);
-        int getSampleRateHz();
-        int getBitsPerSample();
-        int getNumChannels();
+        BufSampler(int sampleRateHz, int bitsPerSample, int numChannels, double volume, int duration_milliseconds);
+        void sample(ToneGenerator *generator, int toneFrequencyHz, Envelope *envelope);
+  
         std::vector<char>& getSampleData();  
 };
  
