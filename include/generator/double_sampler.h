@@ -10,12 +10,15 @@ class DoubleSampler: public Sampler
         
         DoubleSampler();
         std::vector<char> internal_buffer[2];
-        int active_buffer;
+        
+        int current_wr_buffer_index;
+        int current_rd_buffer_index;
 
     public:
  
         DoubleSampler(int sampleRateHz, int bitsPerSample, int numChannels, double volume, int durationMilliSeconds);
-        void sample(ToneGenerator *generator, int toneFrequencyHz, Envelope *envelope);
+   
+        void sample();
 
         std::vector<char>& getSampleData();  
 };

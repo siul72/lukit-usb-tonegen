@@ -24,6 +24,7 @@ Logging* Logging::getInstance()  {
 }
 
 Logging::Logging(){
+  this->init_uart();
 }
 
 void Logging::console_write(const char *msg){

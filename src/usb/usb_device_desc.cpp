@@ -18,7 +18,7 @@ extern "C" constexpr auto USBDeviceDesc = make_device(
     make_configuration(
         configuration::bConfigurationValue(1),
         configuration::bNumInterfaces(2),
-        configuration::bMaxPower(80),
+        configuration::bMaxPower(USBD_MAX_POWER),
         configuration::bmAttributes(0x80),
         make_interface(
             interface::bInterfaceNumber(0),

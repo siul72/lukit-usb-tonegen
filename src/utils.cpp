@@ -49,21 +49,20 @@ Utils::Utils(){
   this->init();
 }
 
-void Utils::init()
-{
+void Utils::init(){
     const int sampleRateHz    = 48000;    // number of samples per second
     const int numChannels     = 1;        // Mono
     const int bitsPerSample   = 8; // 8 bits
 
-    noteDuration = 100;
+    noteDuration = 50;
     pureTone = new PureToneGenerator();
     sampler = new BufSampler(sampleRateHz, bitsPerSample, numChannels, volume, noteDuration);
     noEnvelope = new NoEnvelope();
 
-    sampler->sample(pureTone, A4, noEnvelope);
-
+    sampler->setSampler(pureTone, A4, noEnvelope);
+    sampler->sample();
     rd_ptr = 0;
-    usb_in_len = sampleRateHz / 1000;
+    usb_in_len = 4 * sampleRateHz / 1000;
  
     tone_buffer_len = sizeof(char)*sampler->getSampleData().size();
     sprintf(Logging::UART2_TX_Buffer, "sampler %d bytes\n", (int)tone_buffer_len);
@@ -72,8 +71,7 @@ void Utils::init()
 }
  
 
-void Utils::error_handler(void)
-{
+void Utils::error_handler(void){
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
@@ -83,43 +81,36 @@ void Utils::error_handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
  
-double Utils::get_increment_from_hz(int hz)
-{
-  return (2 * M_PI) / ((1000000.0 / hz) / sample_period);
-}
 
-void Utils::get_sine_sample(){
+void Utils::get_sine_sample(char **buf, u_int32_t * cur_len){
 
-    u_int32_t cur_len = 4*usb_in_len;
-    char* buf = (char *)&sampler->getSampleData()[rd_ptr];
-    rd_ptr = rd_ptr + cur_len;
+    *cur_len = usb_in_len;
+    *buf = (char *)&sampler->getSampleData()[rd_ptr];
+    rd_ptr = rd_ptr + *cur_len;
     if (rd_ptr >= tone_buffer_len){
       
-      cur_len =  usb_in_len - (rd_ptr - tone_buffer_len);
+      *cur_len =  usb_in_len - (rd_ptr - tone_buffer_len);
       //sprintf(this->logger.UART2_TX_Buffer, "short %d:%d:%d:%d\n", (int)tone_buffer_len, (int)cur_len, (int)usb_in_len, (int)rd_ptr);
       //this->console_write(this->logger.UART2_TX_Buffer);
       rd_ptr = 0;
-      if (cur_len > usb_in_len){
+      if (*cur_len > usb_in_len){
           Logging::getInstance()->console_write("there is a bug!");   
       }
     }
     
-    USBD_HandleTypeDef *pdev = &hUsbDeviceFS;
-    USBD_LL_Transmit(pdev, AUDIO_MIC_IN_USB_EP, (uint8_t*)(buf), cur_len);
+    //USBD_HandleTypeDef *pdev = &hUsbDeviceFS;
+    //USBD_LL_Transmit(pdev, AUDIO_MIC_IN_USB_EP, (uint8_t*)(buf), cur_len);
     //sprintf(this->logger.UART2_TX_Buffer, "tx %d bytes at %d\n", (int)usb_in_len, (int)rd_ptr);
     //this->console_write(this->logger.UART2_TX_Buffer);
-   
- 
+  
 }
 
-uint32_t Utils::usb_audio_write_tx_data(char* buf, uint32_t len)
-{
+uint32_t Utils::usb_audio_write_tx_data(char* buf, uint32_t len){
    
      return len;
 }
 
-void Utils::ADC_to_MIC(void)
-{
+void Utils::ADC_to_MIC(void){
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, OSA_BUF_SIZE * (AUDIO_IN_PACKET / 2)); // Start ADC transfer into oversampling buffer
 }
  

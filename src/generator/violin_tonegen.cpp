@@ -5,6 +5,7 @@
 double ViolinGenerator::generate(int fundamentalFrequencyHz, double timeIndexSeconds, int durationSeconds)
 {
     UNUSED(durationSeconds);
+    
     double amplitude = 0.49;
 
     double harmonic1PeriodSeconds = 1.0 / fundamentalFrequencyHz;

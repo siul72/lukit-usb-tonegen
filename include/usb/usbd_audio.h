@@ -107,7 +107,10 @@ extern "C" {
 
 /* Buffering state definitions */
 typedef enum {
-  STATE_USB_WAITING_FOR_INIT = 0, STATE_USB_IDLE = 1, STATE_USB_REQUESTS_STARTED = 2, STATE_USB_BUFFER_WRITE_STARTED = 3,
+  STATE_USB_WAITING_FOR_INIT = 0, 
+  AUDIO_STATE_IDLE = 1, 
+  STATE_AUDIO_REQUEST_STARTED = 2, 
+  STATE_AUDIO_STREAM = 3,
 } AUDIO_StatesTypeDef;
 
 /* Number of sub-packets in the audio transfer buffer.*/

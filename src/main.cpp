@@ -40,6 +40,7 @@ UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_rx;
 Utils* Utils::instancePtr = NULL;
 Logging* Logging::instancePtr = NULL;
+uint32_t log_counter = 0;
  
 void _write(int file, const char *data, const uint32_t size){
     uint32_t i;
@@ -57,6 +58,7 @@ int main(void){
   MX_USB_DEVICE_Init();
 
   Logging::getInstance()->console_write("System start...\n"); 
+  Utils::getInstance();
    
   uint32_t elapsed_time, current_time = 0;
   uint32_t delta_time = 100;

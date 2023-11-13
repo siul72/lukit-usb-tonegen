@@ -29,9 +29,8 @@ public:
     void init();
   
     static void error_handler(void);
-  
-    double get_increment_from_hz(int hz);
-    void get_sine_sample();
+   
+    void get_sine_sample(char ** buf, u_int32_t *len);
     uint32_t usb_audio_write_tx_data(char *buf, uint32_t len);
     void ADC_to_MIC(void);
     uint8_t USBD_AUDIO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);

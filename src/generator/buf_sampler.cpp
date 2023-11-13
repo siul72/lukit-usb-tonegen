@@ -9,14 +9,14 @@ Sampler(sampleRateHz, bitsPerSample, numChannels, volume, duration_milliseconds)
 }
 
  
-void BufSampler::sample(ToneGenerator* generator, int toneFrequencyHz, Envelope* envelope)
+void BufSampler::sample()
 {
     
     //sprintf(Utils::getInstance()->UART2_TX_Buffer, "Generate tone number of samples = %d\n", (int)sample_buffer_size);
     //Logging::getInstance()->console_write(Utils::getInstance()->UART2_TX_Buffer);
-    for(int i=0; i < sample_buffer_size; i++) {
+    for(uint32_t i=0; i < sample_buffer_size; i++) {
         double timeIndexSeconds = (double)i / this->sample_rate_hz;
-        double sample = generator->generate(toneFrequencyHz, timeIndexSeconds, sample_duration_time / 1000);
+        double sample = generator->generate(tone_frequency_hz, timeIndexSeconds, sample_duration_time / 1000);
          // apply envelope
         sample = sample * envelope->getAmplitude(timeIndexSeconds);
         // apply volume

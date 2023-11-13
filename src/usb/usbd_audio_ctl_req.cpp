@@ -7,8 +7,7 @@ extern unsigned char *USBDevice;
 extern size_t USBDeviceSize;
 extern unsigned char *USBConfiguration;
 extern size_t USBConfigurationSize;
- 
-
+extern uint32_t log_counter;
 volatile uint32_t tx_flag = 1;
  
 #define AUDIO_SAMPLE_FREQ(frq)         (uint8_t)(frq), (uint8_t)((frq >> 8)), (uint8_t)((frq >> 16))
@@ -20,19 +19,12 @@ static uint8_t IsocInBuffDummy[48 * 4 * 2];
 static int16_t MUTE_CUR;
 static int16_t VOL_CUR;
 static uint8_t EQ_CUR[36];
-
-
-/** @defgroup USBD_AUDIO_Private_FunctionPrototypes
-  * @{
-  */
+ 
 static uint8_t USBD_AUDIO_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static USBD_StatusTypeDef USBD_AUDIO_Init_IN(USBD_HandleTypeDef *pdev, USBD_AUDIO_HandleTypeDef *haudio);
 static USBD_StatusTypeDef USBD_AUDIO_Init_OUT(USBD_HandleTypeDef *pdev, USBD_AUDIO_HandleTypeDef *haudio);
 static uint8_t USBD_AUDIO_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
-
-static uint8_t USBD_AUDIO_Setup(USBD_HandleTypeDef *pdev,
-                                USBD_SetupReqTypedef *req);
-
+static uint8_t USBD_AUDIO_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 static uint8_t *USBD_AUDIO_GetCfgDesc(uint16_t *length);
 static uint8_t *USBD_AUDIO_GetDeviceQualifierDesc(uint16_t *length);
 static uint8_t USBD_AUDIO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
@@ -40,7 +32,6 @@ static uint8_t USBD_AUDIO_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum);
 static uint8_t USBD_AUDIO_EP0_RxReady(USBD_HandleTypeDef *pdev);
 static uint8_t USBD_AUDIO_EP0_TxReady(USBD_HandleTypeDef *pdev);
 static uint8_t USBD_AUDIO_SOF(USBD_HandleTypeDef *pdev);
-
 static uint8_t USBD_AUDIO_IsoINIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum);
 static uint8_t USBD_AUDIO_IsoOutIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum);
 static void AUDIO_REQ_GetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
@@ -113,7 +104,7 @@ static USBD_StatusTypeDef USBD_AUDIO_Init_IN(USBD_HandleTypeDef *pdev, USBD_AUDI
   }
 
   pdev->ep_in[AUDIO_MIC_IN_USB_EP & 0xFU].is_used = 1U;
-  haudio->state = STATE_USB_IDLE;
+  haudio->state = AUDIO_STATE_IDLE;
 
     /** 
    * Set tx_flag 1 to block feedback transmission in SOF handler since 
@@ -155,9 +146,7 @@ static USBD_StatusTypeDef USBD_AUDIO_Init_OUT(USBD_HandleTypeDef *pdev, USBD_AUD
     return ret_status;
 }
 
-
-static uint8_t USBD_AUDIO_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
-{
+static uint8_t USBD_AUDIO_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx){
   UNUSED(cfgidx);
   USBD_AUDIO_HandleTypeDef *haudio;
   USBD_StatusTypeDef ret_status = USBD_OK;
@@ -204,15 +193,7 @@ static uint8_t USBD_AUDIO_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   return USBD_OK;
 }
 
-/**
-  * @brief  USBD_AUDIO_Init
-  *         DeInitialize the AUDIO layer
-  * @param  pdev: device instance
-  * @param  cfgidx: Configuration index
-  * @retval status
-  */
-static uint8_t USBD_AUDIO_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
-{
+static uint8_t USBD_AUDIO_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx){
   UNUSED(cfgidx);
 
   /* Open EP OUT */
@@ -236,16 +217,8 @@ static uint8_t USBD_AUDIO_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   return (uint8_t)USBD_OK;
 }
 
-/**
-  * @brief  USBD_AUDIO_Setup
-  *         Handle the AUDIO specific requests
-  * @param  pdev: instance
-  * @param  req: usb requests
-  * @retval status
-  */
 static uint8_t USBD_AUDIO_Setup(USBD_HandleTypeDef *pdev,
-                                USBD_SetupReqTypedef *req)
-{
+                                USBD_SetupReqTypedef *req){
 
   USBD_AUDIO_HandleTypeDef *haudio;
   uint16_t len;
@@ -311,6 +284,7 @@ static uint8_t USBD_AUDIO_Setup(USBD_HandleTypeDef *pdev,
           haudio->alt_setting = (uint8_t) (req->wValue);
           if (haudio->alt_setting == 0){
             tx_flag = 1U;
+            haudio->state = AUDIO_STATE_IDLE;
           }
 
           if (haudio->alt_setting == 1){
@@ -333,22 +307,12 @@ static uint8_t USBD_AUDIO_Setup(USBD_HandleTypeDef *pdev,
   return ret;
 }
 
- 
-static uint8_t *USBD_AUDIO_GetCfgDesc(uint16_t *length)
-{
+static uint8_t *USBD_AUDIO_GetCfgDesc(uint16_t *length){
    *length = (uint16_t)USBConfigurationSize;
   return USBConfiguration;
 }
 
-/**
-  * @brief  USBD_AUDIO_DataIn
-  *         handle data IN Stage
-  * @param  pdev: device instance
-  * @param  epnum: endpoint index
-  * @retval status
-  */
-static uint8_t USBD_AUDIO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
-{
+static uint8_t USBD_AUDIO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum){
   USBD_AUDIO_HandleTypeDef *haudio;
   haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
   uint32_t length_usb_pck;
@@ -363,16 +327,33 @@ static uint8_t USBD_AUDIO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
    
   length_usb_pck = packet_dim;
   haudio->timeout = 0;
-  if (epnum == (AUDIO_MIC_IN_USB_EP & 0x7F)) {
-      //Utils::getInstance()->get_sine_sample();
+  char *tone_buf = NULL;
+  u_int32_t cur_len = 0;
 
-    if (haudio->state == STATE_USB_IDLE) {
-      haudio->state = STATE_USB_REQUESTS_STARTED;
-      //((USBD_AUDIO_ItfTypeDef*) pdev->pUserData)->Record();
-      haudio->state = STATE_USB_BUFFER_WRITE_STARTED;
+  if (epnum == (AUDIO_MIC_IN_USB_EP & 0x7F)) {
+
+    switch (haudio->state){
+      case AUDIO_STATE_IDLE:
+        //((USBD_AUDIO_ItfTypeDef*) pdev->pUserData)->Record();
+        sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_DataIn AUDIO_STATE_IDLE -> STATE_AUDIO_STREAM\n");
+        Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
+        haudio->state = STATE_AUDIO_STREAM;
+        USBD_LL_Transmit(pdev, AUDIO_MIC_IN_USB_EP, IsocInBuffDummy, length_usb_pck);
+      break;
+
+      case STATE_AUDIO_STREAM:
+        Utils::getInstance()->get_sine_sample(&tone_buf, &cur_len);
+        USBD_LL_Transmit(pdev, AUDIO_MIC_IN_USB_EP, (uint8_t*)(tone_buf), cur_len);
+
+      break;
+      
+      default:
+        Logging::getInstance()->console_write("dummy tx");
+        USBD_LL_Transmit(pdev, AUDIO_MIC_IN_USB_EP, IsocInBuffDummy, length_usb_pck);
+      break;
     }
-    if (haudio->state == STATE_USB_BUFFER_WRITE_STARTED) {
-      Utils::getInstance()->get_sine_sample();
+  }
+    
      /*    haudio->rd_ptr = haudio->rd_ptr % (true_dim);
         if (IsocInWr_app < haudio->rd_ptr) {
           app = ((true_dim) - haudio->rd_ptr) + IsocInWr_app;
@@ -391,24 +372,13 @@ static uint8_t USBD_AUDIO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
           ((USBD_AUDIO_ItfTypeDef*) pdev->pUserData)->Stop();
           haudio->state = STATE_USB_IDLE;
           haudio->timeout = 0;
-          memset(haudio->buffer, 0, (haudio->buffer_length + haudio->dataAmount)); 
-        } */
-    } else {
-      USBD_LL_Transmit(pdev, AUDIO_MIC_IN_USB_EP, IsocInBuffDummy, length_usb_pck);
-    }
-  }
+          memset(haudio->buffer, 0, (haudio->buffer_length + haudio->dataAmount)); */
+   
   
   return (uint8_t)USBD_OK;
 }
 
-/**
-  * @brief  USBD_AUDIO_EP0_RxReady
-  *         handle EP0 Rx Ready event
-  * @param  pdev: device instance
-  * @retval status
-  */
-static uint8_t USBD_AUDIO_EP0_RxReady(USBD_HandleTypeDef *pdev)
-{
+static uint8_t USBD_AUDIO_EP0_RxReady(USBD_HandleTypeDef *pdev){
   USBD_AUDIO_HandleTypeDef *haudio;
   haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
 
@@ -441,14 +411,8 @@ static uint8_t USBD_AUDIO_EP0_RxReady(USBD_HandleTypeDef *pdev)
 
   return (uint8_t)USBD_OK;
 }
-/**
-  * @brief  USBD_AUDIO_EP0_TxReady
-  *         handle EP0 TRx Ready event
-  * @param  pdev: device instance
-  * @retval status
-  */
-static uint8_t USBD_AUDIO_EP0_TxReady(USBD_HandleTypeDef *pdev)
-{
+
+static uint8_t USBD_AUDIO_EP0_TxReady(USBD_HandleTypeDef *pdev){
   UNUSED(pdev);
   //sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_EP0_TxReady\n");
   //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
@@ -456,26 +420,22 @@ static uint8_t USBD_AUDIO_EP0_TxReady(USBD_HandleTypeDef *pdev)
   /* Only OUT control data are processed */
   return (uint8_t)USBD_OK;
 }
-/**
-  * @brief  USBD_AUDIO_SOF
-  *         handle SOF event
-  * @param  pdev: device instance
-  * @retval status
-  */
-static uint8_t USBD_AUDIO_SOF(USBD_HandleTypeDef *pdev)
-{
+
+static uint8_t USBD_AUDIO_SOF(USBD_HandleTypeDef *pdev){
   UNUSED(pdev); 
+  USBD_AUDIO_HandleTypeDef *haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
+  
+  if (haudio->state == AUDIO_STATE_IDLE) {
+    return (uint8_t)USBD_OK;
+  }
+
+  //sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_SOF %d\n", (int)HAL_GetTick());
+  //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
+ 
   return (uint8_t)USBD_OK;
 }
 
-/**
-  * @brief  USBD_AUDIO_SOF
-  *         handle SOF event
-  * @param  pdev: device instance
-  * @retval status
-  */
-void USBD_AUDIO_Sync(USBD_HandleTypeDef *pdev, AUDIO_OffsetTypeDef offset)
-{
+void USBD_AUDIO_Sync(USBD_HandleTypeDef *pdev, AUDIO_OffsetTypeDef offset){
   USBD_AUDIO_HandleTypeDef *haudio;
   uint32_t BufferSize = AUDIO_TOTAL_BUF_SIZE / 2U;
 
@@ -540,29 +500,14 @@ void USBD_AUDIO_Sync(USBD_HandleTypeDef *pdev, AUDIO_OffsetTypeDef offset)
   }
 }
 
-/**
-  * @brief  USBD_AUDIO_IsoINIncomplete
-  *         handle data ISO IN Incomplete event
-  * @param  pdev: device instance
-  * @param  epnum: endpoint index
-  * @retval status
-  */
-static uint8_t USBD_AUDIO_IsoINIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum)
-{
+static uint8_t USBD_AUDIO_IsoINIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum){
   UNUSED(pdev);
   UNUSED(epnum);
 
   return (uint8_t)USBD_OK;
 }
-/**
-  * @brief  USBD_AUDIO_IsoOutIncomplete
-  *         handle data ISO OUT Incomplete event
-  * @param  pdev: device instance
-  * @param  epnum: endpoint index
-  * @retval status
-  */
-static uint8_t USBD_AUDIO_IsoOutIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum)
-{
+
+static uint8_t USBD_AUDIO_IsoOutIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum){
   UNUSED(pdev);
   UNUSED(epnum);
   
@@ -571,15 +516,8 @@ static uint8_t USBD_AUDIO_IsoOutIncomplete(USBD_HandleTypeDef *pdev, uint8_t epn
 
   return (uint8_t)USBD_OK;
 }
-/**
-  * @brief  USBD_AUDIO_DataOut
-  *         handle data OUT Stage
-  * @param  pdev: device instance
-  * @param  epnum: endpoint index
-  * @retval status
-  */
-static uint8_t USBD_AUDIO_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
-{
+
+static uint8_t USBD_AUDIO_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum){
   uint16_t PacketSize;
   USBD_AUDIO_HandleTypeDef *haudio;
 
@@ -636,15 +574,7 @@ static uint8_t USBD_AUDIO_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
   return (uint8_t)USBD_OK;
 }
 
-/**
-  * @brief  AUDIO_Req_GetCurrent
-  *         Handles the GET_CUR Audio control request.
-  * @param  pdev: instance
-  * @param  req: setup class request
-  * @retval status
-  */
-static void AUDIO_REQ_GetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
-{
+static void AUDIO_REQ_GetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req){
   
   USBD_AUDIO_HandleTypeDef *haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
   uint8_t bControlSelector = req->wValue >> 8;
@@ -674,15 +604,7 @@ static void AUDIO_REQ_GetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   
 }
 
-/**
-  * @brief  AUDIO_Req_SetCurrent
-  *         Handles the SET_CUR Audio control request.
-  * @param  pdev: instance
-  * @param  req: setup class request
-  * @retval status
-  */
-static void AUDIO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
-{
+static void AUDIO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req){
   USBD_AUDIO_HandleTypeDef *haudio;
   haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
   uint8_t bControlSelector = req->wValue >> 8;
@@ -723,13 +645,6 @@ static void AUDIO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   }
 }
 
-/**
- * @brief  AUDIO_REQ_GetMaximum
- *         Handles the VOL_MAX Audio control request.
- * @param  pdev: instance
- * @param  req: setup class request
- * @retval status
- */
 static void AUDIO_REQ_GetMaximum(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req) {
 
   USBD_AUDIO_HandleTypeDef *haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
@@ -760,13 +675,6 @@ static void AUDIO_REQ_GetMaximum(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   USBD_CtlSendData(pdev, haudio->control.data, req->wLength);
 }
 
-/**
- * @brief  AUDIO_REQ_GetMinimum
- *         Handles the VOL_MIN Audio control request.
- * @param  pdev: instance
- * @param  req: setup class request
- * @retval status
- */
 static void AUDIO_REQ_GetMinimum(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req) {
 
   USBD_AUDIO_HandleTypeDef *haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
@@ -798,13 +706,6 @@ static void AUDIO_REQ_GetMinimum(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   USBD_CtlSendData(pdev, haudio->control.data, req->wLength);
 }
 
-/**
- * @brief  AUDIO_Req_GetResolution
- *         Handles the VOL_RES Audio control request.
- * @param  pdev: instance
- * @param  req: setup class request
- * @retval status
- */
 static void AUDIO_REQ_GetResolution(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req) {
 
   USBD_AUDIO_HandleTypeDef *haudio = (USBD_AUDIO_HandleTypeDef *)pdev->pClassData;
@@ -841,30 +742,14 @@ static void AUDIO_REQ_GetResolution(USBD_HandleTypeDef *pdev, USBD_SetupReqTyped
   USBD_CtlSendData(pdev, haudio->control.data, req->wLength);
 }
 
-
-
-/**
-  * @brief  DeviceQualifierDescriptor
-  *         return Device Qualifier descriptor
-  * @param  length : pointer data length
-  * @retval pointer to descriptor buffer
-  */
-static uint8_t *USBD_AUDIO_GetDeviceQualifierDesc(uint16_t *length)
-{
+static uint8_t *USBD_AUDIO_GetDeviceQualifierDesc(uint16_t *length){
   *length = (uint16_t)sizeof(USBD_AUDIO_DeviceQualifierDesc);
   //sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_GetDeviceQualifierDesc\n");
   //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
   return USBD_AUDIO_DeviceQualifierDesc;
 }
 
-/**
-  * @brief  USBD_AUDIO_RegisterInterface
-  * @param  fops: Audio interface callback
-  * @retval status
-  */
-uint8_t USBD_AUDIO_RegisterInterface(USBD_HandleTypeDef *pdev,
-                                     USBD_AUDIO_ItfTypeDef *fops)
-{
+uint8_t USBD_AUDIO_RegisterInterface(USBD_HandleTypeDef *pdev, USBD_AUDIO_ItfTypeDef *fops){
   
   sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_RegisterInterface\n");
   Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);

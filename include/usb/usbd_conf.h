@@ -11,32 +11,27 @@
 #include "main.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal.h"
- 
-
-/*---------- -----------*/
+  
 #define USBD_MAX_NUM_INTERFACES     3U
-/*---------- -----------*/
 #define USBD_MAX_NUM_CONFIGURATION     1U
-/*---------- -----------*/
 #define USBD_MAX_STR_DESC_SIZ     512U
-/*---------- -----------*/
 #define USBD_DEBUG_LEVEL     0U
-/*---------- -----------*/
 #define USBD_LPM_ENABLED     0U
-/*---------- -----------*/
 #define USBD_SELF_POWERED     0U //1U is self powered else not
-/*---------- -----------*/
-#define USBD_AUDIO_IN_FREQ      8000U
-#define USBD_AUDIO_OUT_FREQ     8000U
+ 
+#define USBD_AUDIO_IN_FREQ      48000U
+#define USBD_AUDIO_OUT_FREQ     48000U
 
 #define USBD_MAX_POWER 50
+
+#define USE_SOF ENABLE
+//#define USE_SOF DISABLE
 
 /****************************************/
 /* #define for FS and HS identification */
 #define DEVICE_FS 		0
 #define DEVICE_HS 		1
  
-
 #define USBD_malloc         (void *)USBD_static_malloc
 
 /** Alias for memory release. */
