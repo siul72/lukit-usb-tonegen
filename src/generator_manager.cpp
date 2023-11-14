@@ -1,5 +1,5 @@
 /**********************************************************************************
-* File: utils.cpp
+* File: generator_manager.cpp
 * Author: Luis Coelho <luis.coelho.720813@gmail.com>
 * Date: 2023.11.11
 * Description: Main File for the Luki Generator
@@ -25,7 +25,7 @@
 * USING OR REDISTRIBUTING THE WORK AND ASSUME ANY RISKS ASSOCIATED WITH YOUR USE OF THIS WORK.
 ***********************************************************************************/
 #include <math.h>
-#include "utils.h"
+#include "generator_manager.h"
 #include "usb/usbd_audio.h"
 #include "logging.h"
  
@@ -34,9 +34,9 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
  
 int16_t adc_buffer[OSA_BUF_SIZE * AUDIO_IN_PACKET / 2] = {0};
  
-Utils* Utils::getInstance()  {
+GeneratorManager* GeneratorManager::getInstance()  {
     if (instancePtr == NULL) {
-         instancePtr = new Utils(); 
+         instancePtr = new GeneratorManager(); 
            return instancePtr; 
     }
     else{
@@ -44,34 +44,51 @@ Utils* Utils::getInstance()  {
     }
 }
 
-Utils::Utils(){
+GeneratorManager::GeneratorManager(){
   
   this->init();
 }
 
-void Utils::init(){
+void GeneratorManager::sample(){
+  sampler->sample();
+}
+
+void GeneratorManager::init(){
     const int sampleRateHz    = 48000;    // number of samples per second
     const int numChannels     = 1;        // Mono
     const int bitsPerSample   = 8; // 8 bits
 
-    noteDuration = 50;
+    noteDuration = 1;
     pureTone = new PureToneGenerator();
-    sampler = new BufSampler(sampleRateHz, bitsPerSample, numChannels, volume, noteDuration);
+    //sampler = new BufSampler(sampleRateHz, bitsPerSample, numChannels, volume, noteDuration);
+    sampler = new DoubleSampler(sampleRateHz, bitsPerSample, numChannels, volume, noteDuration);
     noEnvelope = new NoEnvelope();
 
     sampler->setSampler(pureTone, A4, noEnvelope);
     sampler->sample();
-    rd_ptr = 0;
-    usb_in_len = 4 * sampleRateHz / 1000;
+
  
-    tone_buffer_len = sizeof(char)*sampler->getSampleData().size();
-    sprintf(Logging::UART2_TX_Buffer, "sampler %d bytes\n", (int)tone_buffer_len);
-    Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
+    //tone_buffer_len = sizeof(char)*sampler->getSampleData().size();
+    //sprintf(Logging::UART2_TX_Buffer, "sampler %d bytes\n", (int)tone_buffer_len);
+    //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
 
 }
  
+void GeneratorManager::getSample(char **buf, uint32_t * cur_len){
+    this->sampler->getSample(buf, cur_len);
+  
+}
 
-void Utils::error_handler(void){
+uint32_t GeneratorManager::usb_audio_write_tx_data(char* buf, uint32_t len){
+   
+     return len;
+}
+
+void GeneratorManager::ADC_to_MIC(void){
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, OSA_BUF_SIZE * (AUDIO_IN_PACKET / 2)); // Start ADC transfer into oversampling buffer
+}
+
+void GeneratorManager::error_handler(void){
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
@@ -79,39 +96,6 @@ void Utils::error_handler(void){
   {
   }
   /* USER CODE END Error_Handler_Debug */
-}
- 
-
-void Utils::get_sine_sample(char **buf, u_int32_t * cur_len){
-
-    *cur_len = usb_in_len;
-    *buf = (char *)&sampler->getSampleData()[rd_ptr];
-    rd_ptr = rd_ptr + *cur_len;
-    if (rd_ptr >= tone_buffer_len){
-      
-      *cur_len =  usb_in_len - (rd_ptr - tone_buffer_len);
-      //sprintf(this->logger.UART2_TX_Buffer, "short %d:%d:%d:%d\n", (int)tone_buffer_len, (int)cur_len, (int)usb_in_len, (int)rd_ptr);
-      //this->console_write(this->logger.UART2_TX_Buffer);
-      rd_ptr = 0;
-      if (*cur_len > usb_in_len){
-          Logging::getInstance()->console_write("there is a bug!");   
-      }
-    }
-    
-    //USBD_HandleTypeDef *pdev = &hUsbDeviceFS;
-    //USBD_LL_Transmit(pdev, AUDIO_MIC_IN_USB_EP, (uint8_t*)(buf), cur_len);
-    //sprintf(this->logger.UART2_TX_Buffer, "tx %d bytes at %d\n", (int)usb_in_len, (int)rd_ptr);
-    //this->console_write(this->logger.UART2_TX_Buffer);
-  
-}
-
-uint32_t Utils::usb_audio_write_tx_data(char* buf, uint32_t len){
-   
-     return len;
-}
-
-void Utils::ADC_to_MIC(void){
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, OSA_BUF_SIZE * (AUDIO_IN_PACKET / 2)); // Start ADC transfer into oversampling buffer
 }
  
 

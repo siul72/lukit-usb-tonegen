@@ -10,7 +10,9 @@ class BufSampler: public Sampler
     public:
         BufSampler(int sampleRateHz, int bitsPerSample, int numChannels, double volume, int duration_milliseconds);
         void sample();
-  
+
+        void getSample(char **buf, uint32_t *cur_len);
+
         std::vector<char>& getSampleData();  
 };
  

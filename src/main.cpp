@@ -26,7 +26,7 @@
 ***********************************************************************************/
 #include "usb/usb_device.h"
 #include "main.h"
-#include "utils.h"
+#include "generator_manager.h"
 #include "logging.h"
  
 void SystemClock_Config(void);
@@ -38,7 +38,7 @@ ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_rx;
-Utils* Utils::instancePtr = NULL;
+GeneratorManager* GeneratorManager::instancePtr = NULL;
 Logging* Logging::instancePtr = NULL;
 uint32_t log_counter = 0;
  
@@ -58,7 +58,7 @@ int main(void){
   MX_USB_DEVICE_Init();
 
   Logging::getInstance()->console_write("System start...\n"); 
-  Utils::getInstance();
+  GeneratorManager::getInstance();
    
   uint32_t elapsed_time, current_time = 0;
   uint32_t delta_time = 100;

@@ -19,6 +19,9 @@ class Sampler
         ToneGenerator *generator;
         uint32_t tone_frequency_hz;
         Envelope *envelope;
+        uint32_t rd_ptr;
+        uint32_t usb_in_len;
+        uint32_t tone_buffer_len;
        
     public:
     
@@ -30,6 +33,8 @@ class Sampler
         int getNumChannels();
         virtual void sample() = 0;
         virtual std::vector<char>& getSampleData() = 0;
+        virtual void getSample(char ** buf, uint32_t *len) = 0;
+      
        
 };
  

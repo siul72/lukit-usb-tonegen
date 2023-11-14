@@ -6,6 +6,7 @@
 #include <string.h>
 #include <usbd_def.h> 
 #include "generator/buf_sampler.h"
+#include "generator/double_sampler.h"
 #include "generator/pure_tonegen.h"
 #include "generator/no_envelope.h"
 
@@ -20,20 +21,19 @@
   ((byte) & 0x02 ? '1' : '0'), \
   ((byte) & 0x01 ? '1' : '0') 
 
-class Utils {
+class GeneratorManager {
 
 public:
-    static Utils* getInstance();
-    Utils();
-    Utils(const Utils& obj) = delete;
+    static GeneratorManager* getInstance();
+    GeneratorManager();
+    GeneratorManager(const GeneratorManager& obj) = delete;
     void init();
-  
+    void sample();
+
     static void error_handler(void);
-   
-    void get_sine_sample(char ** buf, u_int32_t *len);
+    void getSample(char ** buf, uint32_t *len);
     uint32_t usb_audio_write_tx_data(char *buf, uint32_t len);
     void ADC_to_MIC(void);
-    uint8_t USBD_AUDIO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
     static UART_HandleTypeDef huart2;
     static uint8_t UART2_RX_Buffer[26];
     static char UART2_TX_Buffer[128];
@@ -42,7 +42,7 @@ public:
 
 private:
     
-    static Utils* instancePtr; 
+    static GeneratorManager* instancePtr; 
     int32_t sample_period;
     double theta;
     uint8_t val;
@@ -53,14 +53,13 @@ private:
     u_int32_t sample_byte_len;
     unsigned long last_micros;
     double inc;
-    BufSampler *sampler;
+    //BufSampler *sampler;
+    Sampler *sampler;
     PureToneGenerator *pureTone;
     NoEnvelope *noEnvelope;
     const double volume       = 0.75;     // 0.0 .. 1.0
     double noteDuration;     // seconds
-    uint32_t rd_ptr;
-    uint32_t usb_in_len;
-    uint32_t tone_buffer_len;
+
 
 
 };

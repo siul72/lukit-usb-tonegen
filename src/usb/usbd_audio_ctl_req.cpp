@@ -1,7 +1,7 @@
 #include "usb/usbd_audio.h"
 #include "usbd_ctlreq.h"
-#include "utils.h"
 #include "logging.h"
+#include "generator_manager.h"
  
 extern unsigned char *USBDevice;
 extern size_t USBDeviceSize;
@@ -342,7 +342,7 @@ static uint8_t USBD_AUDIO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum){
       break;
 
       case STATE_AUDIO_STREAM:
-        Utils::getInstance()->get_sine_sample(&tone_buf, &cur_len);
+        GeneratorManager::getInstance()->getSample(&tone_buf, &cur_len);
         USBD_LL_Transmit(pdev, AUDIO_MIC_IN_USB_EP, (uint8_t*)(tone_buf), cur_len);
 
       break;
@@ -429,6 +429,10 @@ static uint8_t USBD_AUDIO_SOF(USBD_HandleTypeDef *pdev){
     return (uint8_t)USBD_OK;
   }
 
+   if (haudio->state == STATE_AUDIO_STREAM){
+      GeneratorManager::getInstance()->sample();
+   }
+ 
   //sprintf(Logging::UART2_TX_Buffer, ">>USBD_AUDIO_SOF %d\n", (int)HAL_GetTick());
   //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
  

@@ -17,6 +17,9 @@ Sampler::Sampler(int sampleRateHz, int bitsPerSample, int numChannels, double in
     this->sample_rate_hz = sampleRateHz;
     this->sample_buffer_size = sample_rate_hz * num_channels * bits_per_sample/8 * sample_duration_time/1000;
     this->volume = in_volume;
+    this->rd_ptr = 0;
+
+    this->usb_in_len = 4 * sample_rate_hz / 1000;
  }
 
 void Sampler::setSampler(ToneGenerator *generator, int toneFrequencyHz, Envelope *envelope){
@@ -47,5 +50,6 @@ int Sampler::getBitsPerSample(){
 int Sampler::getNumChannels(){
     return this->num_channels;
 }
+ 
 
  

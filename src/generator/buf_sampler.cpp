@@ -1,6 +1,8 @@
 #include "generator/buf_sampler.h"
 #include "generator/envelope.h"
 #include "generator/tonegen.h" 
+#include "logging.h"
+ 
  
  
 BufSampler::BufSampler(int sampleRateHz, int bitsPerSample, int numChannels, double volume=0.75, int duration_milliseconds=1): 
@@ -31,8 +33,33 @@ void BufSampler::sample()
     }
 }
 
+void BufSampler::getSample(char **buf, uint32_t * cur_len){
+
+    *cur_len = usb_in_len;
+    *buf = (char *)&this->getSampleData()[rd_ptr];
+    tone_buffer_len = this->getSampleData().size();
+    rd_ptr = rd_ptr + *cur_len;
+    if (rd_ptr >= tone_buffer_len){
+      
+      *cur_len =  usb_in_len - (rd_ptr - tone_buffer_len);
+      //sprintf(this->logger.UART2_TX_Buffer, "short %d:%d:%d:%d\n", (int)tone_buffer_len, (int)cur_len, (int)usb_in_len, (int)rd_ptr);
+      //this->console_write(this->logger.UART2_TX_Buffer);
+      rd_ptr = 0;
+      if (*cur_len > usb_in_len){
+          Logging::getInstance()->console_write("there is a bug!");   
+      }
+    }
+    
+    //USBD_HandleTypeDef *pdev = &hUsbDeviceFS;
+    //USBD_LL_Transmit(pdev, AUDIO_MIC_IN_USB_EP, (uint8_t*)(buf), cur_len);
+    //sprintf(this->logger.UART2_TX_Buffer, "tx %d bytes at %d\n", (int)usb_in_len, (int)rd_ptr);
+    //this->console_write(this->logger.UART2_TX_Buffer);
+  
+}
+
 
 std::vector<char> &BufSampler::getSampleData(){
     return this->sample_data;
 }
+ 
  
