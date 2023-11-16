@@ -21,15 +21,14 @@ class DoubleSampler: public Sampler
         
         DoubleSampler();
         std::vector<char> internal_buffer[DOUBLE_BUF_SIZE];
-        
-        int current_wr_buffer_index;
-        int current_rd_buffer_index;
         buf_status_enum buf_status[DOUBLE_BUF_SIZE];
+        double timeIndexSeconds;
 
     public:
  
         DoubleSampler(int sampleRateHz, int bitsPerSample, int numChannels, double volume, int durationMilliSeconds);
         void sample();
+        SamplerType getType() const;
         std::vector<char>& getSampleData();  
         void getSample(char **buf, uint32_t * cur_len);
 };

@@ -7,7 +7,20 @@
  
 BufSampler::BufSampler(int sampleRateHz, int bitsPerSample, int numChannels, double volume=0.75, int duration_milliseconds=1): 
 Sampler(sampleRateHz, bitsPerSample, numChannels, volume, duration_milliseconds){
+
+    
  
+}
+
+void BufSampler::setSampler(ToneGenerator *generator, int toneFrequencyHz, Envelope *envelope){
+    Sampler::setSampler(generator, toneFrequencyHz, envelope);
+    this->sample_duration_time = 1 / (double)tone_frequency_hz;
+    this->sample_buffer_size = sample_rate_hz * num_channels * bits_per_sample/8 * sample_duration_time;
+
+}
+
+SamplerType BufSampler::getType() const  {
+        return SamplerType::Buffer;
 }
 
  
@@ -16,6 +29,7 @@ void BufSampler::sample()
     
     //sprintf(Utils::getInstance()->UART2_TX_Buffer, "Generate tone number of samples = %d\n", (int)sample_buffer_size);
     //Logging::getInstance()->console_write(Utils::getInstance()->UART2_TX_Buffer);
+    this->sample_data.clear();
     for(uint32_t i=0; i < sample_buffer_size; i++) {
         double timeIndexSeconds = (double)i / this->sample_rate_hz;
         double sample = generator->generate(tone_frequency_hz, timeIndexSeconds, sample_duration_time / 1000);

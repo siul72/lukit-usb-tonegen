@@ -45,12 +45,14 @@ GeneratorManager* GeneratorManager::getInstance()  {
 }
 
 GeneratorManager::GeneratorManager(){
-  
-  this->init();
+    this->init();
 }
 
 void GeneratorManager::sample(){
-  sampler->sample();
+   //only fetch samples for double sampler
+   if (sampler->getType() == SamplerType::DoubleBuffer){
+      sampler->sample();
+   }
 }
 
 void GeneratorManager::init(){
@@ -63,7 +65,6 @@ void GeneratorManager::init(){
     //sampler = new BufSampler(sampleRateHz, bitsPerSample, numChannels, volume, noteDuration);
     sampler = new DoubleSampler(sampleRateHz, bitsPerSample, numChannels, volume, noteDuration);
     noEnvelope = new NoEnvelope();
-
     sampler->setSampler(pureTone, A4, noEnvelope);
     sampler->sample();
 

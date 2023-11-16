@@ -4,6 +4,11 @@
 #include <vector>
 #include "tonegen.h" 
 #include "envelope.h"
+
+enum class SamplerType {
+    Buffer,
+    DoubleBuffer
+};
  
 class Sampler
 {
@@ -13,7 +18,7 @@ class Sampler
         uint8_t num_channels;
         uint32_t sample_value_range;
         uint32_t sample_buffer_size;
-        uint32_t sample_duration_time;
+        double sample_duration_time;
         std::vector<char> sample_data;
         double volume;
         ToneGenerator *generator;
@@ -25,8 +30,9 @@ class Sampler
        
     public:
     
-        Sampler(int sampleRateHz, int bitsPerSample, int numChannels, double volume, int durationMilliseconds);
-        void setSampler(ToneGenerator *generator, int toneFrequencyHz, Envelope *envelope);
+        Sampler(int sampleRateHz, int bitsPerSample, int numChannels, double volume, double durationMilliseconds);
+        virtual void setSampler(ToneGenerator *generator, int toneFrequencyHz, Envelope *envelope);
+        virtual SamplerType getType() const = 0;
         void setVolume(double in_volume);
         int getSampleRateHz();
         int getBitsPerSample();

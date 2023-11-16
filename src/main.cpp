@@ -52,12 +52,13 @@ void _write(int file, const char *data, const uint32_t size){
 int main(void){
   HAL_Init();
   SystemClock_Config();
+  MX_ADC1_Init();
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_ADC1_Init();
+  Logging::getInstance()->console_write("System start...\n"); 
   MX_USB_DEVICE_Init();
 
-  Logging::getInstance()->console_write("System start...\n"); 
+  Logging::getInstance()->console_write("Init done...\n"); 
   GeneratorManager::getInstance();
    
   uint32_t elapsed_time, current_time = 0;
