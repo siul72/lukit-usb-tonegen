@@ -29,6 +29,14 @@ void Sampler::setSampler(ToneGenerator *generator, int toneFrequencyHz, Envelope
     this->sample_buffer_size = sample_rate_hz * num_channels * bits_per_sample/8 * sample_duration_time/1000;
 }
 
+void Sampler::setFrequency(NoteFrequencies frequency) {
+    this->tone_frequency_hz = frequency;    
+}
+
+void Sampler::setGenerator(ToneGenerator *generator) {
+    this->generator = generator;   
+}
+
 void Sampler::setVolume(double in_volume){
      if(in_volume < 0 || in_volume > 1) {
         // loudest

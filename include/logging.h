@@ -36,7 +36,7 @@
 
      void init_uart();
      void error_handler(void);
-     static uint8_t UART2_RX_Buffer[26];
+     static char UART2_RX_Buffer[192];
      static char UART2_TX_Buffer[128];
      DMA_HandleTypeDef hdma_usart2_rx;
 

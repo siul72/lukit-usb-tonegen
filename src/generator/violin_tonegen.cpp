@@ -2,7 +2,7 @@
  
 
 // Violin sound https://meettechniek.info/additional/additive-synthesis.html
-double ViolinGenerator::generate(int fundamentalFrequencyHz, double timeIndexSeconds, int durationSeconds)
+double ViolinGenerator::generate(int fundamentalFrequencyHz, double timeIndexSeconds, double durationSeconds)
 {
     UNUSED(durationSeconds);
     
@@ -51,5 +51,9 @@ double ViolinGenerator::generate(int fundamentalFrequencyHz, double timeIndexSec
                   + harmonic10Amplitude * cos(harmonic10Radians) );
 
     return result;
+}
+
+GeneratorType ViolinGenerator::getType() const  {
+        return GeneratorType::Violin;
 }
  

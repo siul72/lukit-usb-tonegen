@@ -12,13 +12,20 @@
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
 #endif
- 
+enum class GeneratorType {
+    Pure,
+    Square,
+    Violin,
+    Chirp,
+    Bell
+};
+
 class ToneGenerator
 {
     public:
         // the tone generator returns a continous result between [-1.0, 1.0]
         virtual double generate(int toneFrequencyHz, double timeIndexSeconds, double durationSeconds) = 0;
- 
+        virtual GeneratorType getType() const = 0;
 };
 
 // Note names, MIDI numbers and frequencies: https://pages.mtu.edu/~suits/notefreqs.html

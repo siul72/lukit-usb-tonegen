@@ -61,18 +61,47 @@ int main(void){
   Logging::getInstance()->console_write("Init done...\n"); 
   GeneratorManager::getInstance();
    
-  uint32_t elapsed_time, current_time = 0;
-  uint32_t delta_time = 100;
+  uint32_t elapsed_time, led_elapsed_time = 0, play_elapsed_time = 0, current_time = 0;
+  uint32_t delta_time = 10, led_delta_time = 5;
+  uint32_t play_tone_time = 100;
+  
   uint8_t state = 0;
+  u_int8_t current_play_note_index = 0;
+  std::vector<NoteFrequencies> play_notes;
+  play_notes.insert(play_notes.end(), { C5, D5, G5, B5, C6, G6, D6, B5, D5 });
 
   while (1){
      elapsed_time = HAL_GetTick();
      if (elapsed_time - current_time > delta_time) {
-        delta_time = 50 + state * 3000;
         current_time = elapsed_time;
-        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, (GPIO_PinState) state);
-        state = 1 - state;
-     }
+        if (led_elapsed_time > led_delta_time) {
+          state = 1- state;
+          led_delta_time = 5 + state * 300;
+          led_elapsed_time = 0;
+          HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, (GPIO_PinState) state);
+
+        } else {
+          led_elapsed_time++;  
+        }
+
+        if (play_elapsed_time > play_tone_time) {
+            GeneratorManager::getInstance()->setFrequency(play_notes.at(current_play_note_index));
+            play_elapsed_time = 0;
+            current_play_note_index++;
+            if (current_play_note_index >= play_notes.size()) {
+                current_play_note_index = 0;
+                if (GeneratorManager::getInstance()->getGeneratorType() == GeneratorType::Pure){
+                  GeneratorManager::getInstance()->setViolin();
+                }
+                if (GeneratorManager::getInstance()->getGeneratorType() == GeneratorType::Violin){
+                  GeneratorManager::getInstance()->setPureTone();
+                }
+                
+            } 
+        } else {
+          play_elapsed_time++;
+        }
+    }
   }
 }
 

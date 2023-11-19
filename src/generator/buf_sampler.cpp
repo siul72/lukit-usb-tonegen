@@ -22,7 +22,6 @@ void BufSampler::setSampler(ToneGenerator *generator, int toneFrequencyHz, Envel
 SamplerType BufSampler::getType() const  {
         return SamplerType::Buffer;
 }
-
  
 void BufSampler::sample()
 {

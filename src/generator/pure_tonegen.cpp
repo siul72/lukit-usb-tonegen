@@ -10,4 +10,8 @@ double PureToneGenerator::generate(int toneFrequencyHz, double timeIndexSeconds,
 
     return result;
 }
+
+GeneratorType PureToneGenerator::getType() const  {
+        return GeneratorType::Pure;
+}
  

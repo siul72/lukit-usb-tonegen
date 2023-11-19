@@ -8,49 +8,37 @@ DoubleSampler::DoubleSampler(int sampleRateHz, int bitsPerSample, int numChannel
     for(uint8_t i = 0; i < DOUBLE_BUF_SIZE; i++){
         this->buf_status[i]=BUF_STATUS_FREE;
     }
+        
 
-    timeIndexSeconds = 0;
+    current_time_seconds = 0;
+    current_time_index=0;
+    buf_index = 0;
 }
  
 void DoubleSampler::sample(){
-
-    uint8_t buf_index = 0xff;
-    //check available buffer
-    for(uint8_t i = 0; i < DOUBLE_BUF_SIZE; i++){
-        if (this->buf_status[i] == BUF_STATUS_FREE){
-            buf_index = i;
-            break;
-        }
-    }
-
-    if (buf_index == 0xff){
+ 
+    if (this->buf_status[buf_index] == BUF_STATUS_WRITING){
         return;
     }
 
-    //sprintf(Logging::UART2_TX_Buffer, "write buf_index=%u", buf_index);
-    //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
-
     this->buf_status[buf_index] = BUF_STATUS_WRITING;
-    //sample
     this->internal_buffer[buf_index].clear();
     for(uint32_t i=0; i < sample_buffer_size; i++) {
-        timeIndexSeconds = timeIndexSeconds + (double)i / this->sample_rate_hz;
-        double sample = generator->generate(tone_frequency_hz, timeIndexSeconds, sample_duration_time);
-         // apply envelope
-        sample = sample * envelope->getAmplitude(timeIndexSeconds);
-        // apply volume
+        //double  timeIndexSeconds =  (double)(i) / this->sample_rate_hz;
+        current_time_seconds =  (double)(i+current_time_index) / this->sample_rate_hz;
+        double sample = generator->generate(tone_frequency_hz, current_time_seconds, sample_duration_time);
+        sample = sample * envelope->getAmplitude(current_time_seconds);
         sample = sample * volume;
-        // map continous result from tone generator [-1.0, 1.0] to discrete sample value range [0 .. 255]
         char sampleValue = (double)sample_value_range/2.0 * (sample + 1.0);
-        //char16_t sampleValue = (char16_t)v;
         sampleValue = sampleValue + 127;
         this->internal_buffer[buf_index].push_back(0);
         this->internal_buffer[buf_index].push_back(sampleValue);
         this->internal_buffer[buf_index].push_back(0);
         this->internal_buffer[buf_index].push_back(sampleValue);
     }
-
+    current_time_index = current_time_index  + sample_buffer_size;
     this->buf_status[buf_index] = BUF_STATUS_READ_READY;
+    buf_index = 1 - buf_index;
 
 }
 
@@ -59,18 +47,32 @@ SamplerType DoubleSampler::getType() const  {
 }
 
 void DoubleSampler::getSample(char **buf, uint32_t * cur_len) {
-
-    std::vector<char>  v = this->getSampleData();
-    *buf = (char *) &v;
-    *cur_len = v.size();
-
+   
+    sprintf(Logging::UART2_TX_Buffer, "getSample buf_index=%u ptr=%u\n", buf_index, (uint)rd_ptr);
+    Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
+     
+    if (rd_ptr == 0){
+        current_read_buffer = this->getSampleData();
+    }
+    *cur_len = usb_in_len;
+    *buf = (char *)&current_read_buffer[rd_ptr];
+    rd_ptr = rd_ptr + *cur_len;
+    tone_buffer_len = current_read_buffer.size();
+     
+    if (rd_ptr >= tone_buffer_len){
+      this->sample();
+      *cur_len =  usb_in_len - (rd_ptr - tone_buffer_len);
+      rd_ptr = 0;
+      if (*cur_len > usb_in_len){
+          Logging::getInstance()->console_write("there is a bug!");   
+      }
+    }
 }
 
 std::vector<char> &DoubleSampler::getSampleData(){
     
     uint8_t buf_index = 0xff;
     for(uint8_t i = 0; i < DOUBLE_BUF_SIZE; i++){
-      
         if (this->buf_status[i] == BUF_STATUS_READING){
             this->buf_status[i] = BUF_STATUS_FREE;
         }
@@ -81,16 +83,12 @@ std::vector<char> &DoubleSampler::getSampleData(){
             buf_index = i;
             break;
         }
- 
     }
 
-    if (buf_index == 0xff){
-        return this->sample_data;
+    if (buf_index == 255){
+        Logging::getInstance()->console_write("no read buffer this time!");
+        return this->sample_data;    
     }
-
-    //sprintf(Logging::UART2_TX_Buffer, "read buf_index=%u", buf_index);
-    //Logging::getInstance()->console_write(Logging::UART2_TX_Buffer);
-
     this->buf_status[buf_index] = BUF_STATUS_READING;
     return this->internal_buffer[buf_index];
     

@@ -8,6 +8,7 @@
 #include "generator/buf_sampler.h"
 #include "generator/double_sampler.h"
 #include "generator/pure_tonegen.h"
+#include "generator/violin_tonegen.h"
 #include "generator/no_envelope.h"
 
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
@@ -35,10 +36,12 @@ public:
     uint32_t usb_audio_write_tx_data(char *buf, uint32_t len);
     void ADC_to_MIC(void);
     static UART_HandleTypeDef huart2;
-    static uint8_t UART2_RX_Buffer[26];
-    static char UART2_TX_Buffer[128];
     DMA_HandleTypeDef hdma_usart2_rx;
-    uint8_t audioBufferTx[1024];
+    void setFrequency(NoteFrequencies frequency);
+    void setPureTone();
+    void setViolin();
+    GeneratorType getGeneratorType();
+  
 
 private:
     
@@ -56,6 +59,8 @@ private:
     //BufSampler *sampler;
     Sampler *sampler;
     PureToneGenerator *pureTone;
+    ViolinGenerator *violin;
+    ToneGenerator *current_generator;
     NoEnvelope *noEnvelope;
     const double volume       = 0.75;     // 0.0 .. 1.0
     double noteDuration;     // seconds

@@ -51,8 +51,30 @@ GeneratorManager::GeneratorManager(){
 void GeneratorManager::sample(){
    //only fetch samples for double sampler
    if (sampler->getType() == SamplerType::DoubleBuffer){
-      sampler->sample();
+      //sampler->sample();
    }
+}
+
+void GeneratorManager::setFrequency(NoteFrequencies frequency){
+
+   sampler->setFrequency(frequency);
+
+}
+
+void GeneratorManager::setViolin(){
+    current_generator = violin;
+    sampler->setGenerator(current_generator);
+
+}
+
+void GeneratorManager::setPureTone(){
+    current_generator = pureTone;
+    sampler->setGenerator(current_generator);
+
+}
+
+GeneratorType GeneratorManager::getGeneratorType(){
+    return current_generator->getType();
 }
 
 void GeneratorManager::init(){
@@ -60,12 +82,14 @@ void GeneratorManager::init(){
     const int numChannels     = 1;        // Mono
     const int bitsPerSample   = 8; // 8 bits
 
-    noteDuration = 1;
+    noteDuration = 10;
     pureTone = new PureToneGenerator();
+    violin = new ViolinGenerator();
     //sampler = new BufSampler(sampleRateHz, bitsPerSample, numChannels, volume, noteDuration);
     sampler = new DoubleSampler(sampleRateHz, bitsPerSample, numChannels, volume, noteDuration);
     noEnvelope = new NoEnvelope();
-    sampler->setSampler(pureTone, A4, noEnvelope);
+    current_generator = pureTone;
+    sampler->setSampler(current_generator, A4, noEnvelope);
     sampler->sample();
 
  
@@ -77,6 +101,7 @@ void GeneratorManager::init(){
  
 void GeneratorManager::getSample(char **buf, uint32_t * cur_len){
     this->sampler->getSample(buf, cur_len);
+   
   
 }
 

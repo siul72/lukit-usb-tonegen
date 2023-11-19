@@ -7,7 +7,9 @@ class ViolinGenerator: public ToneGenerator
 {
     public:
        
-        double generate(int fundamentalFrequencyHz, double timeIndexSeconds, int durationSeconds);
+        double generate(int fundamentalFrequencyHz, double timeIndexSeconds, double durationSeconds);
+        GeneratorType getType() const;
+       
 };
 
 #endif

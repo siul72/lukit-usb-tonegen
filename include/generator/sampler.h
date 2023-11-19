@@ -40,6 +40,8 @@ class Sampler
         virtual void sample() = 0;
         virtual std::vector<char>& getSampleData() = 0;
         virtual void getSample(char ** buf, uint32_t *len) = 0;
+        virtual void setFrequency(NoteFrequencies frequency);
+        void setGenerator(ToneGenerator *generator);
       
        
 };

@@ -13,8 +13,8 @@ class BufSampler: public Sampler
         SamplerType getType() const;
         void setSampler(ToneGenerator *generator, int toneFrequencyHz, Envelope *envelope);
         void getSample(char **buf, uint32_t *cur_len);
-
-        std::vector<char>& getSampleData();  
+        std::vector<char>& getSampleData();
+        
 };
  
 #endif

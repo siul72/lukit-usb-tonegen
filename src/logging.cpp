@@ -1,16 +1,15 @@
 #include "logging.h"
  
 UART_HandleTypeDef Logging::huart2;
-uint8_t Logging::UART2_RX_Buffer[26];
+char Logging::UART2_RX_Buffer[192];
 char Logging::UART2_TX_Buffer[128];
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
   
     sprintf(Logging::UART2_TX_Buffer, "Roger, got 26 chars, got for next 26!\n");
     HAL_UART_Transmit(&Logging::huart2, (uint8_t *)Logging::UART2_TX_Buffer, strlen(Logging::UART2_TX_Buffer), 10);
-    HAL_UART_Transmit(&Logging::huart2, Logging::UART2_RX_Buffer, 26, 10);
-    HAL_UART_Receive_DMA(&Logging::huart2, Logging::UART2_RX_Buffer, 26);
+    HAL_UART_Transmit(&Logging::huart2, (uint8_t *)Logging::UART2_RX_Buffer, 26, 10);
+    HAL_UART_Receive_DMA(&Logging::huart2, (uint8_t *)Logging::UART2_RX_Buffer, 26);
 }
 
 Logging* Logging::getInstance()  {
@@ -62,7 +61,7 @@ void Logging::init_uart(){
     error_handler();
   }
 
-  HAL_UART_Receive_DMA(&huart2, UART2_RX_Buffer, 26);
+  HAL_UART_Receive_DMA(&huart2, (uint8_t *)UART2_RX_Buffer, 26);
   
  
 }
