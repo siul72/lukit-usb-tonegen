@@ -24,11 +24,11 @@ void DoubleSampler::sample(){
     this->buf_status[buf_index] = BUF_STATUS_WRITING;
     this->internal_buffer[buf_index].clear();
     for(uint32_t i=0; i < sample_buffer_size; i++) {
-        //double  timeIndexSeconds =  (double)(i) / this->sample_rate_hz;
+        
         current_time_seconds =  (double)(i+current_time_index) / this->sample_rate_hz;
-        double sample = generator->generate(tone_frequency_hz, current_time_seconds, sample_duration_time);
-        sample = sample * envelope->getAmplitude(current_time_seconds);
-        sample = sample * volume;
+        double sample = this->generator->generate(tone_frequency_hz, current_time_seconds, sample_duration_time);
+        sample = sample * this->envelope->getAmplitude(current_time_seconds);
+        sample = sample * this->volume;
         char sampleValue = (double)sample_value_range/2.0 * (sample + 1.0);
         sampleValue = sampleValue + 127;
         this->internal_buffer[buf_index].push_back(0);
